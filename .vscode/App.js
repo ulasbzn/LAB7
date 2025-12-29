@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { Button, FlatList, Keyboard, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+    Button,
+    FlatList,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TodoItem from './components/TodoItem';
 
@@ -19,10 +29,9 @@ export default function App() {
       { id: Math.random().toString(), text: enteredTaskText },
     ]);
     setEnteredTaskText('');
-    Keyboard.dismiss(); 
+    Keyboard.dismiss(); // Görev eklenince klavye kapansın
   }
 
-  // YENİ: Görevi listeden silen fonksiyon
   function deleteTaskHandler(id) {
     setTasks((currentTasks) => {
       return currentTasks.filter((task) => task.id !== id);
@@ -31,36 +40,42 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.appContainer}>
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>My Todo List</Text>
-        
-        <View style={styles.inputContainer}>
-          <TextInput 
-            style={styles.textInput} 
-            placeholder="Görev yaz..." 
-            onChangeText={taskInputHandler}
-            value={enteredTaskText}
-          />
-          <Button title="Ekle" onPress={addTaskHandler} />
-        </View>
+      {/* Klavye giriş alanını kapatmasın diye sarmalıyoruz */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+      >
+        <View style={styles.contentContainer}>
+          <Text style={styles.title}>My Todo List</Text>
+          
+          <View style={styles.inputContainer}>
+            <TextInput 
+              style={styles.textInput} 
+              placeholder="Görev yaz..." 
+              onChangeText={taskInputHandler}
+              value={enteredTaskText}
+            />
+            <Button title="Add" onPress={addTaskHandler} />
+          </View>
 
-        <View style={styles.listContainer}>
-          <FlatList 
-            data={tasks}
-            renderItem={(itemData) => (
-              <TodoItem 
-                text={itemData.item.text} 
-                id={itemData.item.id} // ID'yi gönderiyoruz
-                onDelete={deleteTaskHandler} // Silme fonksiyonunu gönderiyoruz
-              />
-            )}
-            keyExtractor={(item) => item.id}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>No tasks yet. Add one!</Text>
-            }
-          />
+          <View style={styles.listContainer}>
+            <FlatList 
+              data={tasks}
+              renderItem={(itemData) => (
+                <TodoItem 
+                  text={itemData.item.text} 
+                  id={itemData.item.id}
+                  onDelete={deleteTaskHandler} 
+                />
+              )}
+              keyExtractor={(item) => item.id}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No tasks yet. Add one!</Text>
+              }
+            />
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
